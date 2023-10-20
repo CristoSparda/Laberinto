@@ -1,0 +1,9 @@
+﻿  glad.c
+  main.cpp
+C:\Users\Crist\Desktop\Prog Videojuegos\Plantillas de programas\Parcial 2\Laberinto\main.cpp(163,13): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\Crist\Desktop\Prog Videojuegos\Plantillas de programas\Parcial 2\Laberinto\main.cpp(184,28): warning C4244: 'argumento': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\Crist\Desktop\Prog Videojuegos\Plantillas de programas\Parcial 2\Laberinto\main.cpp(190,20): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+  stbImg.cpp
+  Generando código...
+LINK : warning LNK4098: la biblioteca predeterminada'MSVCRT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
+  Proyecto Primera Persona.vcxproj -> C:\Users\Crist\Desktop\Prog Videojuegos\Plantillas de programas\Parcial 2\Laberinto\x64\Debug\Proyecto Primera Persona.exe
