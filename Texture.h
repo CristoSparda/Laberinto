@@ -1,26 +1,30 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "stb_image.h"
-
-class Texture 
+class Texture1
 {
 public:
     int limite;
     unsigned int texture[1];
+    unsigned int textureSky;
 
-    Texture()
+    Texture1()
     {
 
     }
 
-    Texture(unsigned int ourTexture[], int ourLimit)
+    Texture1(unsigned int ourTexture[], int ourLimit)
     {
         limite = ourLimit;
         for (int i = 0; i < limite; i++)
         {
             texture[i] = ourTexture[i];
         }
+    }
+
+    Texture1(unsigned int ourTextureSky)
+    {
+        textureSky = ourTextureSky;
     }
 
     void GeneraTextura(int n, string path, int e)
@@ -84,6 +88,37 @@ public:
         stbi_image_free(data);
     }
 
+    void GeneraTexturaSky(vector<string> faces)
+    {
+        glGenTextures(1, &textureSky);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureSky);
+
+        int width, height, nrChannels;
+
+        for (unsigned int i = 0; i < faces.size(); i++)
+        {
+            stbi_set_flip_vertically_on_load(false);
+            unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+            if (data)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                stbi_image_free(data);
+            }
+            else
+            {
+                cout << "Cubemap texture failed to load at path: " << faces[i] << endl;
+                stbi_image_free(data);
+            }
+            stbi_set_flip_vertically_on_load(true);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    }
+
     void ViewTexture()
     {
         for (int i = 0; i < limite; i++)
@@ -91,6 +126,13 @@ public:
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, texture[i]);
         }
+    }
+
+    void ViewTextureSky()
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP,  textureSky);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
 
     void ViewTextureMap(int num, unsigned int nameMap)
@@ -106,16 +148,22 @@ public:
         string numero = "0";
         int n = stoi(numero);
         for (int i = 0; i < limite; i++)
-        {           
+        {
             completo = "";
             n += 1;
 
             numero = to_string(n);
-            
+
             completo.append(str);
             completo.append(numero);
         }
         return completo;
+    }
+
+    string UniformTextureSky()
+    {
+        string str = "skybox";
+        return str;
     }
 
     unsigned int loadTextureID(string path, int e)
@@ -177,7 +225,6 @@ public:
             cout << "Texture failed to load at path: " << path << endl;
             stbi_image_free(data);
         }
-
         return textureID;
     }
 };

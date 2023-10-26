@@ -144,6 +144,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SkyBoxVertex.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
@@ -154,11 +155,13 @@
     <None Include="fragmentLight.fl" />
     <None Include="fragmentShader.fs" />
     <None Include="fragmentShaderC.fs" />
+    <None Include="fragmentShaderSky.fs" />
     <None Include="fragmentShader_DL.fdl" />
     <None Include="fragmentShader_PL.fpl" />
     <None Include="fragmentShader_SL.fsl" />
     <None Include="vertexLight.vl" />
     <None Include="vertexShaderC.vs" />
+    <None Include="vertexShaderSky.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

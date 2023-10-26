@@ -47,6 +47,9 @@
     <ClInclude Include="Model.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="SkyBoxVertex.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vertexShader.vs">
@@ -76,6 +79,12 @@
       <Filter>Archivos de recursos</Filter>
     </None>
     <None Include="fragmentShaderC.fs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="fragmentShaderSky.fs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="vertexShaderSky.vs">
       <Filter>Archivos de recursos</Filter>
     </None>
   </ItemGroup>

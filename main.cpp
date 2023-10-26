@@ -14,11 +14,17 @@
 #include "Camera.h"
 #include "stb_image.h"
 #include "Model.h"
+#include "SkyBoxVertex.h"
+#include "Texture.h"
 
 using namespace std;
 
 const unsigned width = 1000;
 const unsigned height = 600;
+
+//variables para el skybox
+unsigned int VBOSKY, VAOSKY, EBOSKY;
+unsigned int textureSky;
 
 mat4 projection, view;
 
@@ -45,13 +51,16 @@ void cameraInput(GLFWwindow* window);
 //funciones para vista debug
 void Mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void Scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model ourModel, Shader ourShaderSky, Texture1 ourTextureSky);
 //void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model ourModel);
-void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model ourModel);
 
 void TransformCubo(Shader ourShader);
 //void TransformCuboLight(Shader ourLight);
-void TransformCamera(Shader ourShader);
+void TransformCamera(Shader ourShader, bool isSky);
 void CameraUniform(Shader shaderName);
+//metodos para usar el skybox
+void GeneracionBufferSky();
+void VertexAttribute(int layout, int data, int total, int start);
 
 int main()
 {
@@ -87,9 +96,22 @@ int main()
 	Shader ourShader("vertexShaderC.vs", "fragmentShaderC.fs");
 	Model ourModel("Modelos/laberinto/untitled.obj");
 	Shader ourLight("vertexLight.vl", "fragmentLight.fl");
+	//generacion de shaders para el sky  
+	Shader ourShaderSky("vertexShaderSky.vs", "fragmentShaderSky.fs");
+	Texture1 ourTextureSky(textureSky);
 
-	updateWindow(window, ourShader, ourLight, ourModel);
-	///updateWindow(window, ourShader, ourModel);
+
+	GeneracionBufferSky();
+	ourTextureSky.GeneraTexturaSky(faces);
+	ourShaderSky.use();
+	ourShaderSky.setInt(ourTextureSky.UniformTextureSky(), 0);
+
+	updateWindow(window, ourShader, ourLight, ourModel, ourShaderSky, ourTextureSky);
+	//updateWindow(window, ourShader, ourLight, ourModel);
+
+	glDeleteVertexArrays(1, &VAOSKY);
+	glDeleteBuffers(1, &VBOSKY);
+	glDeleteBuffers(1, &EBOSKY);
 
 	glfwTerminate();
 	return 0;
@@ -183,7 +205,7 @@ void Scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(yoffset);
 }
-void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model ourModel)
+void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model ourModel, Shader ourShaderSky, Texture1 ourTextureSky)
 {
 	while (!glfwWindowShouldClose(window))
 	{
@@ -199,10 +221,19 @@ void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model o
 
 		ourShader.use();
 
-		TransformCamera(ourShader);
+		TransformCamera(ourShader, false);
 		TransformCubo(ourShader);
 		//para dibujar el modelo 
 		ourModel.Draw(ourShader);
+
+		//sky
+		glDepthFunc(GL_LEQUAL);
+		ourShaderSky.use();
+		TransformCamera(ourShaderSky, true);
+		glBindVertexArray(VAOSKY);
+		ourTextureSky.ViewTextureSky();
+		glDepthFunc(GL_LESS);
+
 
 		//la luz se sigue manejando aqui
 		ourLight.use();
@@ -217,7 +248,7 @@ void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model o
 void TransformCubo(Shader ourShader)
 {
 	mat4 modelo = mat4(1.0f);
-	modelo = translate(modelo, vec3(4.0f, 3.0f, 2.0f));
+	modelo = translate(modelo, vec3(4.0f, 0.0f, 2.0f));
 	modelo = scale(modelo, vec3(5.0f, 6.0f, 5.0f));
 	ourShader.setMat4("model", modelo);
 }
@@ -237,11 +268,20 @@ void TransformCuboLight(Shader ourLight)
 	}
 }*/
 
-void TransformCamera(Shader ourShader)
+void TransformCamera(Shader ourShader, bool isSky )
 {
 	projection = perspective(radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 	view = camera.GetViewMatrix();
-	
+
+	if (isSky)
+	{
+		view = mat4(mat3(camera.GetViewMatrix()));
+	}
+	else
+	{
+		view = camera.GetViewMatrix();
+	}
+
 	CameraUniform(ourShader);
 }
 
@@ -250,4 +290,41 @@ void CameraUniform(Shader shaderName)
 	shaderName.setMat4("projection", projection);
 	shaderName.setMat4("view", view);
 
+}
+
+void GeneracionBufferSky()
+{
+	glGenVertexArrays(1, &VAOSKY);
+	glGenBuffers(1, &VBOSKY);
+	glGenBuffers(1, &EBOSKY);
+
+	glBindVertexArray(VAOSKY);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOSKY);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOSKY);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesSky), indicesSky, GL_STATIC_DRAW);
+
+	//como se agrego un layout mas se suman aqui
+	VertexAttribute(0, 3, 8, 0);
+	VertexAttribute(1, 3, 8, 3);
+	VertexAttribute(2, 2, 8, 6);
+
+	//light - se puede separar para hacer un metodo de generabuffer para luz
+	//glGenVertexArrays(1, &VAO_L);
+	//glBindVertexArray(VAO_L);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//
+	//VertexAttribute(0, 3, 8, 0);
+	//VertexAttribute(1, 3, 8, 3);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+}
+void VertexAttribute(int layout, int data, int total, int start)
+{
+	glVertexAttribPointer(layout, data, GL_FLOAT, GL_FALSE, total * sizeof(float), (void*)(start * sizeof(float)));
+	glEnableVertexAttribArray(layout);
 }
