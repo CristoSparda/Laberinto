@@ -89,11 +89,11 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//voltea la textura para evitar que no aparezca al reves
-	//stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(true);
 
 	glEnable(GL_DEPTH_TEST);
 
-	Shader ourShader("vertexShaderC.vs", "fragmentShaderC.fs");
+	Shader ourShader("vertexShader_L.vs", "fragmentShader_L.fs");
 	Model ourModel("Modelos/laberinto/untitled.obj");
 	Shader ourLight("vertexLight.vl", "fragmentLight.fl");
 	//generacion de shaders para el sky  
@@ -105,6 +105,10 @@ int main()
 	ourTextureSky.GeneraTexturaSky(faces);
 	ourShaderSky.use();
 	ourShaderSky.setInt(ourTextureSky.UniformTextureSky(), 0);
+	//setear el material
+	ourShader.setInt("material.diffuse", 0);
+	ourShader.setInt("material.specular", 1);
+
 
 	updateWindow(window, ourShader, ourLight, ourModel, ourShaderSky, ourTextureSky);
 	//updateWindow(window, ourShader, ourLight, ourModel);
@@ -220,6 +224,30 @@ void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model o
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		ourShader.use();
+		//asinga el color del objeto
+		ourShader.setVec3("material.ambient", 1.0f, 0.0f, 1.0f);
+		ourShader.setVec3("material.diffuse", 1.0f, 0.0f, 1.0f);
+		ourShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+		ourShader.setFloat("material.shininess", 32.0f);
+
+
+		//codigo para las luces
+		//sigue siendo para el ourshader pero solo se le asignan los reflejos de luz
+		vec3 lightColor;
+		lightColor.x = sin(glfwGetTime() * 0.3f);
+		lightColor.y = sin(glfwGetTime() * 0.5f);
+		lightColor.z = sin(glfwGetTime() * 1.0f);
+
+		vec3 diffuseColor = lightColor * vec3(0.3f);
+		vec3 ambientColor = diffuseColor * vec3(0.5f);
+
+		//para la luz con dirección
+		ourShader.setVec3("light.direction", -0.9f, -1.0f, -0.3f);
+		ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+		ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+		ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+
 
 		TransformCamera(ourShader, false);
 		TransformCubo(ourShader);
@@ -238,7 +266,6 @@ void updateWindow(GLFWwindow* window, Shader ourShader, Shader ourLight, Model o
 		//la luz se sigue manejando aqui
 		ourLight.use();
 		CameraUniform(ourLight);
-		//TransformCuboLight(ourLight); 
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -252,21 +279,6 @@ void TransformCubo(Shader ourShader)
 	modelo = scale(modelo, vec3(5.0f, 6.0f, 5.0f));
 	ourShader.setMat4("model", modelo);
 }
-
-/*
-void TransformCuboLight(Shader ourLight)
-{
-	int tam = sizeof(posCubeLight) / sizeof(posCubeLight[0]);
-	glBindVertexArray(VAO_L);
-	for (int i = 0; i < tam; i++)
-	{
-		mat4 modelo = mat4(1.0f);
-		modelo = translate(modelo, posCubeLight[i]);
-		modelo = scale(modelo, vec3(0.2f));
-		ourLight.setMat4("model", modelo);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	}
-}*/
 
 void TransformCamera(Shader ourShader, bool isSky )
 {
@@ -311,14 +323,7 @@ void GeneracionBufferSky()
 	VertexAttribute(1, 3, 8, 3);
 	VertexAttribute(2, 2, 8, 6);
 
-	//light - se puede separar para hacer un metodo de generabuffer para luz
-	//glGenVertexArrays(1, &VAO_L);
-	//glBindVertexArray(VAO_L);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//
-	//VertexAttribute(0, 3, 8, 0);
-	//VertexAttribute(1, 3, 8, 3);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 

@@ -157,11 +157,13 @@
     <None Include="fragmentShaderC.fs" />
     <None Include="fragmentShaderSky.fs" />
     <None Include="fragmentShader_DL.fdl" />
+    <None Include="fragmentShader_L.fs" />
     <None Include="fragmentShader_PL.fpl" />
     <None Include="fragmentShader_SL.fsl" />
     <None Include="vertexLight.vl" />
     <None Include="vertexShaderC.vs" />
     <None Include="vertexShaderSky.vs" />
+    <None Include="vertexShader_L.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

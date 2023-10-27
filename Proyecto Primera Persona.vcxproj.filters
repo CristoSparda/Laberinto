@@ -87,5 +87,11 @@
     <None Include="vertexShaderSky.vs">
       <Filter>Archivos de recursos</Filter>
     </None>
+    <None Include="fragmentShader_L.fs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="vertexShader_L.vs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
   </ItemGroup>
 </Project>
